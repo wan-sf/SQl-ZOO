@@ -1,0 +1,12 @@
+/****************************SELECT within SELECT***************************************/
+/*
+-- 10 
+-- Some countries have populations more than three times that of any of their neighbours (in the same continent). 
+-- Give the countries and continents.
+*/
+
+select x.name, x.continent 
+from world x
+where population >= ANY (select MAX(3*population) 
+                         from world y
+                         where x.continent = y.continent and x.name <> y.name)
