@@ -1,0 +1,2 @@
+# SQl-ZOO
+notes, solutions
