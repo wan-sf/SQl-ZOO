@@ -1,12 +1,56 @@
 /****************************SELECT within SELECT***************************************/
-/*
+
+
+/**************************************************************************************
+-- 9
+-- Find the continents where all countries have a population <= 25000000. 
+--Then find the names of the countries associated with these continents. Show name, continent and population.
+**************************************************************************************/
+
+/******Solution1********/
+SELECT name, continent, population 
+FROM world w
+WHERE NOT EXISTS (                  -- there are no countries
+   SELECT *
+   FROM world nx
+   WHERE nx.continent = w.continent -- on the same continent
+   AND nx.population > 25000000     -- with more than 25M population 
+   );
+
+/*******Solution2**********/
+SELECT name, continent, population 
+FROM (SELECT w.*, MAX(population) OVER (PARTITION BY continent) as maxpop
+      FROM world w
+     ) w
+WHERE maxpop < 250000000;
+
+/*********Solution3***********/
+SELECT name, continent, population 
+FROM world w JOIN
+     (SELECT continent
+      FROM world
+      GROUP BY continent
+      HAVING max(pop) < 250000000
+     ) c
+     ON w.continent = c.continent;
+
+/*********Solution4***********/
+SELECT name, continent, population 
+FROM world x 
+WHERE 25000000 > ALL(SELECT population 
+                     FROM world y 
+                     WHERE y.continent = x.continent 
+                     )
+
+/**************************************************************************************
 -- 10 
 -- Some countries have populations more than three times that of any of their neighbours (in the same continent). 
 -- Give the countries and continents.
-*/
+**************************************************************************************/
 
 select x.name, x.continent 
 from world x
 where population >= ANY (select MAX(3*population) 
                          from world y
                          where x.continent = y.continent and x.name <> y.name)
+
